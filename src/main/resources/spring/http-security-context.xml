@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bean:beans xmlns:bean="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.springframework.org/schema/security"
+    xmlns:oauth2="http://www.springframework.org/schema/security/oauth2"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd
+        http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
+
+	<!-- <debug/> -->
+	
+	<http pattern="/static/**" security="none" />
+    
+    <http entry-point-ref="entryPoint">
+    	
+    	<csrf disabled="true"/>
+    	<intercept-url pattern="/index.html" access="permitAll()" />
+    	<intercept-url pattern="/**" access="isAuthenticated()"/>
+        
+        <form-login 
+        	username-parameter="userId"
+        	password-parameter="password" 
+        	login-processing-url="/doLogin"
+        	authentication-success-handler-ref="authSuccessHandler"
+        	authentication-failure-handler-ref="authFailureHandler"/> 
+        	
+        <logout logout-url="/doLogout" />
+    </http>
+    
+    <bean:bean id="authSuccessHandler" class="com.jlab.spokane.common.security.AuthSuccessHandler"/>
+    
+    <bean:bean id="authFailureHandler" class="com.jlab.spokane.common.security.AuthFailureHandler"/>
+    
+    <authentication-manager>
+    	<authentication-provider>
+    		<user-service>
+    			<user name="user1" password="user1" authorities="ROLE_USER"/>
+    		</user-service>
+    	</authentication-provider>
+    </authentication-manager>
+    
+    <bean:bean id="entryPoint" class="org.springframework.security.web.authentication.HttpStatusEntryPoint">
+    	<bean:constructor-arg name="httpStatus" >
+    		<bean:value type="org.springframework.http.HttpStatus">UNAUTHORIZED</bean:value>
+    	</bean:constructor-arg>
+    </bean:bean>
+</bean:beans>
